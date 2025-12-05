@@ -1,7 +1,7 @@
 # Commit Message Guide
 # Commit 訊息規範指南
 
-**Version | 版本**: 1.1.0
+**Version | 版本**: 1.2.0
 **Last Updated | 最後更新**: 2025-12-05
 **Applicability | 適用範圍**: telegram-id-finder project | telegram-id-finder 專案
 
@@ -62,6 +62,7 @@ Use English `type` and `scope` for tool compatibility, with bilingual subject/bo
 | `ci` | CI/CD pipeline changes | CI/CD 管道變更 |
 | `chore` | Maintenance tasks | 維護任務 |
 | `revert` | Revert previous commit | 回退先前提交 |
+| `security` | Security vulnerability fix | 安全漏洞修復 |
 
 ---
 
@@ -95,6 +96,17 @@ Fixes #445
 
 Scope indicates which part of the codebase is affected.
 範圍指出程式碼庫的哪個部分受影響。
+
+### Naming Rules | 命名規則
+
+1. **Use lowercase | 使用小寫**: All scopes should be lowercase (`auth`, not `Auth`)
+   所有範圍應使用小寫（`auth`，而非 `Auth`）
+
+2. **Use hyphen for multi-word | 多字詞用連字號**: Separate words with hyphens (`user-profile`, not `userProfile`)
+   使用連字號分隔多字詞（`user-profile`，而非 `userProfile`）
+
+3. **Keep it short | 保持簡短**: 1-2 words maximum
+   最多 1-2 個單詞
 
 ### Project-Specific Scopes | 專案特定範圍
 
@@ -366,6 +378,7 @@ feat(ui): Add group lookup form. 新增群組查詢表單。
 | Version | Date | Changes |
 |---------|------|---------|
 | 版本 | 日期 | 變更 |
+| 1.2.0 | 2025-12-05 | Add security type; Add scope naming rules 新增 security 類型；新增 scope 命名規則 |
 | 1.1.0 | 2025-12-05 | Adopt Bilingual Mode (Option C) | 採用雙語對照模式（選項 C）|
 | 1.0.0 | 2025-12-05 | Initial guide | 初版指南 |
 
