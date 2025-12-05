@@ -80,3 +80,7 @@ bower_components/
 # Logs
 logs/
 *.log
+
+# Telegram session files | Telegram session 檔案
+*.session
+*.session-journal

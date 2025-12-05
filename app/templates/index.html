@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram ID Finder | Telegram ID 查詢器</title>
+    <!-- Tailwind CSS via CDN | 透過 CDN 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles | 自訂樣式 */
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Toast notification | Toast 通知 -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg toast">
+            <span id="toast-message">Copied! | 已複製！</span>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header | 標題 -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                Telegram ID Finder
+            </h1>
+            <p class="text-gray-600">
+                Find Telegram group/channel IDs and user IDs for configuration
+                <br>
+                <span class="text-sm">取得 Telegram 群組、頻道、用戶 ID 用於設定</span>
+            </p>
+        </header>
+
+        <!-- Main content | 主要內容 -->
+        <main>
+            <!-- Step 1: Login | 步驟 1: 登入 -->
+            <section id="login-section" class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>
+                    Login to Telegram | 登入 Telegram
+                </h2>
+
+                <!-- Login status | 登入狀態 -->
+                <div id="login-status" class="mb-4 p-3 rounded hidden">
+                </div>
+
+                <!-- Credentials form | 憑證表單 -->
+                <div id="credentials-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                API ID
+                                <a href="https://my.telegram.org/apps" target="_blank" class="text-blue-500 text-xs ml-2">
+                                    (Get from my.telegram.org)
+                                </a>
+                            </label>
+                            <input type="text" id="api-id"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Enter API ID | 輸入 API ID">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                API Hash
+                            </label>
+                            <input type="password" id="api-hash"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Enter API Hash | 輸入 API Hash">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Phone Number | 手機號碼
+                        </label>
+                        <input type="tel" id="phone"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="+886912345678">
+                    </div>
+                    <button id="send-code-btn" onclick="sendCode()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200">
+                        Send Code | 發送驗證碼
+                    </button>
+                </div>
+
+                <!-- Verification code form | 驗證碼表單 -->
+                <div id="verify-form" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Verification Code | 驗證碼
+                        </label>
+                        <input type="text" id="code"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Enter the code from Telegram | 輸入 Telegram 收到的驗證碼">
+                    </div>
+                    <div id="2fa-section" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            2FA Password | 2FA 密碼
+                        </label>
+                        <input type="password" id="password"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Enter your 2FA password | 輸入 2FA 密碼">
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="verifyCode()"
+                                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition duration-200">
+                            Verify | 驗證
+                        </button>
+                        <button onclick="resetLogin()"
+                                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200">
+                            Back | 返回
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Logged in state | 已登入狀態 -->
+                <div id="logged-in-section" class="hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span id="user-info" class="text-gray-700"></span>
+                        </div>
+                        <button onclick="logout()"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-200 text-sm">
+                            Logout | 登出
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: Select Groups/Channels | 步驟 2: 選擇群組/頻道 -->
+            <section id="dialogs-section" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">2</span>
+                    Select Groups/Channels | 選擇群組/頻道
+                </h2>
+
+                <div class="mb-4">
+                    <button onclick="loadDialogs()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200 text-sm">
+                        Refresh | 重新整理
+                    </button>
+                </div>
+
+                <div id="dialogs-loading" class="text-center py-8 hidden">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="text-gray-500 mt-2">Loading... | 載入中...</p>
+                </div>
+
+                <div id="dialogs-list" class="space-y-2">
+                </div>
+            </section>
+
+            <!-- Step 3: View Senders | 步驟 3: 查看發言者 -->
+            <section id="senders-section" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">3</span>
+                    Select Senders | 選擇發言者
+                </h2>
+
+                <div id="selected-chat-info" class="mb-4 p-3 bg-gray-50 rounded">
+                </div>
+
+                <div id="senders-loading" class="text-center py-8 hidden">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="text-gray-500 mt-2">Loading senders... | 載入發言者中...</p>
+                </div>
+
+                <div id="senders-list" class="space-y-2">
+                </div>
+            </section>
+
+            <!-- Step 4: Generate Config | 步驟 4: 產生設定 -->
+            <section id="config-section" class="bg-white rounded-lg shadow-md p-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">4</span>
+                    Generate Config | 產生設定
+                </h2>
+
+                <div class="mb-4">
+                    <h3 class="font-medium text-gray-700 mb-2">Selected Items | 已選擇項目：</h3>
+                    <div id="selection-summary" class="text-sm text-gray-600 mb-4">
+                    </div>
+                    <button onclick="generateConfig()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition duration-200">
+                        Generate settings.yaml | 產生 settings.yaml
+                    </button>
+                </div>
+
+                <div id="config-output" class="hidden mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-gray-700">settings.yaml</h3>
+                        <button onclick="copyConfig()"
+                                class="copy-btn bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition duration-200">
+                            Copy | 複製
+                        </button>
+                    </div>
+                    <pre id="yaml-content" class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer | 頁尾 -->
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>
+                <a href="https://github.com/AsiaOstrich/telegram-id-finder" target="_blank" class="hover:text-blue-500">
+                    GitHub Repository
+                </a>
+                 |
+                <a href="https://my.telegram.org/apps" target="_blank" class="hover:text-blue-500">
+                    Get Telegram API Credentials | 取得 Telegram API 憑證
+                </a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // ====================================================================
+        // State Management | 狀態管理
+        // ====================================================================
+
+        const state = {
+            isLoggedIn: false,
+            dialogs: [],
+            selectedChats: new Map(), // Map<id, {id, name, type}>
+            selectedSenders: new Map(), // Map<`${chatId}-${senderId}`, {id, name, chatId}>
+            currentChatId: null
+        };
+
+        // ====================================================================
+        // Initialization | 初始化
+        // ====================================================================
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuthStatus();
+        });
+
+        // ====================================================================
+        // Authentication Functions | 認證函式
+        // ====================================================================
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+
+                if (data.is_logged_in) {
+                    state.isLoggedIn = true;
+                    showLoggedInState(data.user);
+                    showSection('dialogs-section');
+                    loadDialogs();
+                } else {
+                    showLoginForm();
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                showLoginForm();
+            }
+        }
+
+        async function sendCode() {
+            const apiId = document.getElementById('api-id').value.trim();
+            const apiHash = document.getElementById('api-hash').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!apiId || !apiHash || !phone) {
+                showStatus('Please fill in all fields | 請填寫所有欄位', 'error');
+                return;
+            }
+
+            setButtonLoading('send-code-btn', true);
+
+            try {
+                const response = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        api_id: parseInt(apiId),
+                        api_hash: apiHash
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('Code sent! Check your Telegram | 驗證碼已發送！請查看 Telegram', 'success');
+                    document.getElementById('credentials-form').classList.add('hidden');
+                    document.getElementById('verify-form').classList.remove('hidden');
+                } else {
+                    showStatus(data.detail || 'Failed to send code | 發送驗證碼失敗', 'error');
+                }
+            } catch (error) {
+                showStatus('Network error | 網路錯誤', 'error');
+            } finally {
+                setButtonLoading('send-code-btn', false);
+            }
+        }
+
+        async function verifyCode() {
+            const code = document.getElementById('code').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!code) {
+                showStatus('Please enter the verification code | 請輸入驗證碼', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, password: password || null })
+                });
+
+                const data = await response.json();
+
+                if (data.needs_2fa) {
+                    document.getElementById('2fa-section').classList.remove('hidden');
+                    showStatus('Please enter your 2FA password | 請輸入 2FA 密碼', 'warning');
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    state.isLoggedIn = true;
+                    showLoggedInState(data.user);
+                    showSection('dialogs-section');
+                    loadDialogs();
+                    showStatus('Login successful! | 登入成功！', 'success');
+                } else {
+                    showStatus(data.detail || data.message || 'Verification failed | 驗證失敗', 'error');
+                }
+            } catch (error) {
+                showStatus('Network error | 網路錯誤', 'error');
+            }
+        }
+
+        async function logout() {
+            if (!confirm('Are you sure you want to logout? | 確定要登出嗎？')) {
+                return;
+            }
+
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                state.isLoggedIn = false;
+                state.dialogs = [];
+                state.selectedChats.clear();
+                state.selectedSenders.clear();
+
+                hideSection('dialogs-section');
+                hideSection('senders-section');
+                hideSection('config-section');
+                showLoginForm();
+                showStatus('Logged out | 已登出', 'success');
+            } catch (error) {
+                showStatus('Logout failed | 登出失敗', 'error');
+            }
+        }
+
+        function resetLogin() {
+            document.getElementById('credentials-form').classList.remove('hidden');
+            document.getElementById('verify-form').classList.add('hidden');
+            document.getElementById('2fa-section').classList.add('hidden');
+            document.getElementById('code').value = '';
+            document.getElementById('password').value = '';
+            hideStatus();
+        }
+
+        // ====================================================================
+        // Dialog Functions | 對話函式
+        // ====================================================================
+
+        async function loadDialogs() {
+            const loadingEl = document.getElementById('dialogs-loading');
+            const listEl = document.getElementById('dialogs-list');
+
+            loadingEl.classList.remove('hidden');
+            listEl.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/dialogs');
+
+                if (!response.ok) {
+                    throw new Error('Failed to load dialogs');
+                }
+
+                const data = await response.json();
+                state.dialogs = data.dialogs;
+
+                renderDialogs();
+            } catch (error) {
+                listEl.innerHTML = `
+                    <div class="text-center text-red-500 py-4">
+                        Failed to load dialogs | 載入對話失敗
+                    </div>
+                `;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        function renderDialogs() {
+            const listEl = document.getElementById('dialogs-list');
+
+            if (state.dialogs.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No groups or channels found | 未找到群組或頻道
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = state.dialogs.map(dialog => {
+                const isSelected = state.selectedChats.has(dialog.id);
+                const typeIcon = dialog.dialog_type === 'channel' ? '📢' : '👥';
+                const typeLabel = dialog.dialog_type === 'channel' ? 'Channel | 頻道' : 'Group | 群組';
+
+                return `
+                    <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50 ${isSelected ? 'bg-blue-50 border-blue-300' : ''}">
+                        <div class="flex items-center flex-1">
+                            <input type="checkbox"
+                                   id="chat-${dialog.id}"
+                                   ${isSelected ? 'checked' : ''}
+                                   onchange="toggleChat(${dialog.id}, '${escapeHtml(dialog.name)}', '${dialog.dialog_type}')"
+                                   class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="chat-${dialog.id}" class="cursor-pointer flex-1">
+                                <span class="mr-2">${typeIcon}</span>
+                                <span class="font-medium">${escapeHtml(dialog.name)}</span>
+                                <span class="text-gray-400 text-sm ml-2">${typeLabel}</span>
+                                ${dialog.username ? `<span class="text-blue-500 text-sm ml-2">@${dialog.username}</span>` : ''}
+                            </label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <code class="bg-gray-100 px-2 py-1 rounded text-sm">${dialog.id}</code>
+                            <button onclick="copyToClipboard('${dialog.id}')"
+                                    class="copy-btn text-gray-500 hover:text-blue-500 px-2 py-1 text-sm">
+                                Copy | 複製
+                            </button>
+                            <button onclick="viewSenders(${dialog.id}, '${escapeHtml(dialog.name)}')"
+                                    class="text-blue-500 hover:text-blue-700 px-2 py-1 text-sm">
+                                View Senders | 查看發言者
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateConfigSection();
+        }
+
+        function toggleChat(id, name, type) {
+            if (state.selectedChats.has(id)) {
+                state.selectedChats.delete(id);
+                // Also remove associated senders | 同時移除關聯的發送者
+                for (const key of state.selectedSenders.keys()) {
+                    if (key.startsWith(`${id}-`)) {
+                        state.selectedSenders.delete(key);
+                    }
+                }
+            } else {
+                state.selectedChats.set(id, { id, name, type });
+            }
+            renderDialogs();
+            updateConfigSection();
+        }
+
+        // ====================================================================
+        // Sender Functions | 發送者函式
+        // ====================================================================
+
+        async function viewSenders(chatId, chatName) {
+            state.currentChatId = chatId;
+
+            showSection('senders-section');
+            document.getElementById('selected-chat-info').innerHTML = `
+                <strong>${escapeHtml(chatName)}</strong>
+                <code class="bg-gray-200 px-2 py-1 rounded text-sm ml-2">${chatId}</code>
+            `;
+
+            const loadingEl = document.getElementById('senders-loading');
+            const listEl = document.getElementById('senders-list');
+
+            loadingEl.classList.remove('hidden');
+            listEl.innerHTML = '';
+
+            try {
+                const response = await fetch(`/api/dialogs/${chatId}/messages?limit=200`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to load senders');
+                }
+
+                const data = await response.json();
+                renderSenders(data.senders, chatId);
+            } catch (error) {
+                listEl.innerHTML = `
+                    <div class="text-center text-red-500 py-4">
+                        Failed to load senders | 載入發言者失敗
+                    </div>
+                `;
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        function renderSenders(senders, chatId) {
+            const listEl = document.getElementById('senders-list');
+
+            if (senders.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No senders found in recent messages | 最近訊息中未找到發言者
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = senders.map(sender => {
+                const key = `${chatId}-${sender.id}`;
+                const isSelected = state.selectedSenders.has(key);
+                const botLabel = sender.is_bot ? '<span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded ml-2">Bot</span>' : '';
+
+                return `
+                    <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50 ${isSelected ? 'bg-green-50 border-green-300' : ''}">
+                        <div class="flex items-center flex-1">
+                            <input type="checkbox"
+                                   id="sender-${key}"
+                                   ${isSelected ? 'checked' : ''}
+                                   onchange="toggleSender('${key}', ${sender.id}, '${escapeHtml(sender.name)}', ${chatId})"
+                                   class="mr-3 h-4 w-4 text-green-600">
+                            <label for="sender-${key}" class="cursor-pointer flex-1">
+                                <span class="font-medium">${escapeHtml(sender.name)}</span>
+                                ${sender.username ? `<span class="text-blue-500 text-sm ml-2">@${sender.username}</span>` : ''}
+                                ${botLabel}
+                            </label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <code class="bg-gray-100 px-2 py-1 rounded text-sm">${sender.id}</code>
+                            <button onclick="copyToClipboard('${sender.id}')"
+                                    class="copy-btn text-gray-500 hover:text-blue-500 px-2 py-1 text-sm">
+                                Copy | 複製
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateConfigSection();
+        }
+
+        function toggleSender(key, id, name, chatId) {
+            if (state.selectedSenders.has(key)) {
+                state.selectedSenders.delete(key);
+            } else {
+                state.selectedSenders.set(key, { id, name, chatId });
+            }
+            updateConfigSection();
+        }
+
+        // ====================================================================
+        // Config Generation | 設定產生
+        // ====================================================================
+
+        function updateConfigSection() {
+            const hasSelection = state.selectedChats.size > 0;
+
+            if (hasSelection) {
+                showSection('config-section');
+
+                const summaryEl = document.getElementById('selection-summary');
+                const chatsList = Array.from(state.selectedChats.values())
+                    .map(c => `• ${c.name} (${c.id})`)
+                    .join('<br>');
+
+                const sendersList = Array.from(state.selectedSenders.values())
+                    .map(s => `• ${s.name} (${s.id})`)
+                    .join('<br>');
+
+                summaryEl.innerHTML = `
+                    <div class="mb-2">
+                        <strong>Chats (${state.selectedChats.size}):</strong><br>
+                        ${chatsList}
+                    </div>
+                    ${state.selectedSenders.size > 0 ? `
+                        <div>
+                            <strong>Senders (${state.selectedSenders.size}):</strong><br>
+                            ${sendersList}
+                        </div>
+                    ` : ''}
+                `;
+            } else {
+                hideSection('config-section');
+            }
+        }
+
+        async function generateConfig() {
+            const chats = Array.from(state.selectedChats.values()).map(c => ({
+                id: c.id,
+                name: c.name
+            }));
+
+            const senders = Array.from(state.selectedSenders.values()).map(s => ({
+                id: s.id,
+                name: s.name,
+                chat_id: s.chatId
+            }));
+
+            try {
+                const response = await fetch('/api/generate-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chats, senders })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('yaml-content').textContent = data.yaml;
+                document.getElementById('config-output').classList.remove('hidden');
+            } catch (error) {
+                showToast('Failed to generate config | 產生設定失敗', 'error');
+            }
+        }
+
+        function copyConfig() {
+            const yaml = document.getElementById('yaml-content').textContent;
+            copyToClipboard(yaml);
+        }
+
+        // ====================================================================
+        // Utility Functions | 工具函式
+        // ====================================================================
+
+        function showSection(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideSection(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showLoginForm() {
+            document.getElementById('credentials-form').classList.remove('hidden');
+            document.getElementById('verify-form').classList.add('hidden');
+            document.getElementById('logged-in-section').classList.add('hidden');
+        }
+
+        function showLoggedInState(user) {
+            document.getElementById('credentials-form').classList.add('hidden');
+            document.getElementById('verify-form').classList.add('hidden');
+            document.getElementById('logged-in-section').classList.remove('hidden');
+            document.getElementById('user-info').textContent =
+                `Logged in as | 已登入：${user.name}${user.username ? ` (@${user.username})` : ''}`;
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('login-status');
+            statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700',
+                                      'bg-red-100', 'text-red-700',
+                                      'bg-yellow-100', 'text-yellow-700');
+
+            if (type === 'success') {
+                statusEl.classList.add('bg-green-100', 'text-green-700');
+            } else if (type === 'error') {
+                statusEl.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'warning') {
+                statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
+            }
+
+            statusEl.textContent = message;
+        }
+
+        function hideStatus() {
+            document.getElementById('login-status').classList.add('hidden');
+        }
+
+        function setButtonLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(String(text)).then(() => {
+                showToast('Copied! | 已複製！');
+            }).catch(() => {
+                showToast('Failed to copy | 複製失敗', 'error');
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+
+            messageEl.textContent = message;
+            toast.querySelector('div').className = `${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-6 py-3 rounded-lg shadow-lg toast`;
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
