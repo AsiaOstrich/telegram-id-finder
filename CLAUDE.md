@@ -24,6 +24,7 @@ Core standards are located in `.standards/` | 核心規範位於 `.standards/`�
 - `checkin-standards.md` - Code check-in quality gates | 簽入品質關卡
 - `commit-message-guide.md` - Commit message conventions | Commit 訊息慣例
 - `git-workflow.md` - GitHub Flow workflow | GitHub Flow 工作流程
+- `testing-standards.md` - Testing conventions (UT/IT/E2E) | 測試慣例（UT/IT/E2E）
 
 ---
 
@@ -124,7 +125,8 @@ telegram-id-finder/
 │   ├── anti-hallucination.md
 │   ├── checkin-standards.md
 │   ├── commit-message-guide.md
-│   └── git-workflow.md
+│   ├── git-workflow.md
+│   └── testing-standards.md
 ├── .gitignore              # Git ignore rules | Git 忽略規則
 ├── CLAUDE.md               # This file - AI guidelines | 此檔案 - AI 指引
 ├── README.md               # Project documentation | 專案文件
